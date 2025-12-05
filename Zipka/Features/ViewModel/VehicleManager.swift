@@ -1,0 +1,84 @@
+//
+//  VehicleManager.swift
+//  Zipka
+//
+//  Created by Jakub Majka on 4/12/25.
+//
+
+import Foundation
+import CoreLocation
+import SwiftUI
+import Observation 
+import ZIpkaProtobuf
+
+@Observable
+class VehicleManager {
+    var vehicles: [Vehicle] = []
+    private var timer: Timer?
+    private let dataFetcher = DataFetcher()
+    
+    init() {
+        startUpdating()
+    }
+    
+    deinit {
+        stopUpdating()
+    }
+    
+    func startUpdating() {
+        fetchVehicles()
+        
+        timer = Timer.scheduledTimer(withTimeInterval: 15.0, repeats: true) { [weak self] _ in
+            self?.fetchVehicles()
+        }
+    }
+    
+    func stopUpdating() {
+        timer?.invalidate()
+        timer = nil
+    }
+    
+    private func fetchVehicles() {
+        let baseURL = URL(string: "https://gtfs.ztp.krakow.pl")!
+        let requestURL = URL(string: "VehiclePositions.pb", relativeTo: baseURL)!
+        
+        Task {
+            do {
+                let feedMessage = try await dataFetcher.fetchDataAsync(request: requestURL)
+                
+                let newVehicles = feedMessage.entity.compactMap { entity -> Vehicle? in
+                    guard entity.hasVehicle else { return nil }
+                    let vehicleData = entity.vehicle
+                    
+                    guard vehicleData.hasPosition else { return nil }
+                    
+                    let pos = vehicleData.position
+                    let lat = Double(pos.latitude)
+                    let lon = Double(pos.longitude)
+                    
+                    let id = vehicleData.hasVehicle ? vehicleData.vehicle.id : entity.id
+                    
+                    let bearing: Int? = pos.hasBearing ? Int(pos.bearing) : nil
+                    
+                    return Vehicle(
+                        id: id,
+                        position: CLLocationCoordinate2D(latitude: lat, longitude: lon),
+                        bearing: bearing
+                    )
+                }
+                
+                await MainActor.run {
+                    withAnimation {
+                        self.updateVehicles(newVehicles)
+                    }
+                }
+            } catch {
+                print("Error fetching vehicles: \(error)")
+            }
+        }
+    }
+    
+    private func updateVehicles(_ newVehicles: [Vehicle]) {
+        self.vehicles = newVehicles
+    }
+}

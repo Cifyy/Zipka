@@ -6,6 +6,12 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		61317AD52EE2390200F99A6B /* SwiftProtobuf in Frameworks */ = {isa = PBXBuildFile; productRef = 61317AD42EE2390200F99A6B /* SwiftProtobuf */; };
+		61317AF82EE243E100F99A6B /* protoc-gen-swift in Frameworks */ = {isa = PBXBuildFile; productRef = 61317AF72EE243E100F99A6B /* protoc-gen-swift */; };
+		61DFDA4F2EE2D8A300C87AC5 /* libZIpkaProtobuf.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 61DFDA462EE2D86100C87AC5 /* libZIpkaProtobuf.a */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		61A58E232EE21FE4008D508D /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -21,13 +27,43 @@
 			remoteGlobalIDString = 61A58E122EE21FE2008D508D;
 			remoteInfo = Zipka;
 		};
+		61DFDA502EE2D8A300C87AC5 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 61A58E0B2EE21FE2008D508D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 61DFDA452EE2D86100C87AC5;
+			remoteInfo = ZIpkaProtobuf;
+		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		61DFDA442EE2D86100C87AC5 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "include/$(PRODUCT_NAME)";
+			dstSubfolderSpec = 16;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		61A58E132EE21FE2008D508D /* Zipka.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Zipka.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		61A58E222EE21FE4008D508D /* ZipkaTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ZipkaTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		61A58E2C2EE21FE4008D508D /* ZipkaUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ZipkaUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		61DFDA462EE2D86100C87AC5 /* libZIpkaProtobuf.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libZIpkaProtobuf.a; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		61DFDA532EE2DB9400C87AC5 /* Exceptions for "ZIpkaProtobuf" folder in "ZIpkaProtobuf" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				gtfs_realtime.proto,
+			);
+			target = 61DFDA452EE2D86100C87AC5 /* ZIpkaProtobuf */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		61A58E152EE21FE2008D508D /* Zipka */ = {
@@ -45,6 +81,14 @@
 			path = ZipkaUITests;
 			sourceTree = "<group>";
 		};
+		61DFDA472EE2D86100C87AC5 /* ZIpkaProtobuf */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				61DFDA532EE2DB9400C87AC5 /* Exceptions for "ZIpkaProtobuf" folder in "ZIpkaProtobuf" target */,
+			);
+			path = ZIpkaProtobuf;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -52,6 +96,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				61DFDA4F2EE2D8A300C87AC5 /* libZIpkaProtobuf.a in Frameworks */,
+				61317AF82EE243E100F99A6B /* protoc-gen-swift in Frameworks */,
+				61317AD52EE2390200F99A6B /* SwiftProtobuf in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -69,6 +116,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		61DFDA432EE2D86100C87AC5 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -78,6 +132,8 @@
 				61A58E152EE21FE2008D508D /* Zipka */,
 				61A58E252EE21FE4008D508D /* ZipkaTests */,
 				61A58E2F2EE21FE4008D508D /* ZipkaUITests */,
+				61DFDA472EE2D86100C87AC5 /* ZIpkaProtobuf */,
+				61A58E662EE22D29008D508D /* Frameworks */,
 				61A58E142EE21FE2008D508D /* Products */,
 			);
 			sourceTree = "<group>";
@@ -88,8 +144,16 @@
 				61A58E132EE21FE2008D508D /* Zipka.app */,
 				61A58E222EE21FE4008D508D /* ZipkaTests.xctest */,
 				61A58E2C2EE21FE4008D508D /* ZipkaUITests.xctest */,
+				61DFDA462EE2D86100C87AC5 /* libZIpkaProtobuf.a */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		61A58E662EE22D29008D508D /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -106,12 +170,15 @@
 			buildRules = (
 			);
 			dependencies = (
+				61DFDA512EE2D8A300C87AC5 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				61A58E152EE21FE2008D508D /* Zipka */,
 			);
 			name = Zipka;
 			packageProductDependencies = (
+				61317AD42EE2390200F99A6B /* SwiftProtobuf */,
+				61317AF72EE243E100F99A6B /* protoc-gen-swift */,
 			);
 			productName = Zipka;
 			productReference = 61A58E132EE21FE2008D508D /* Zipka.app */;
@@ -163,6 +230,28 @@
 			productReference = 61A58E2C2EE21FE4008D508D /* ZipkaUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
+		61DFDA452EE2D86100C87AC5 /* ZIpkaProtobuf */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 61DFDA4A2EE2D86100C87AC5 /* Build configuration list for PBXNativeTarget "ZIpkaProtobuf" */;
+			buildPhases = (
+				61DFDA422EE2D86100C87AC5 /* Sources */,
+				61DFDA432EE2D86100C87AC5 /* Frameworks */,
+				61DFDA442EE2D86100C87AC5 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				61DFDA472EE2D86100C87AC5 /* ZIpkaProtobuf */,
+			);
+			name = ZIpkaProtobuf;
+			packageProductDependencies = (
+			);
+			productName = ZIpkaProtobuf;
+			productReference = 61DFDA462EE2D86100C87AC5 /* libZIpkaProtobuf.a */;
+			productType = "com.apple.product-type.library.static";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -184,6 +273,9 @@
 						CreatedOnToolsVersion = 26.1.1;
 						TestTargetID = 61A58E122EE21FE2008D508D;
 					};
+					61DFDA452EE2D86100C87AC5 = {
+						CreatedOnToolsVersion = 26.1.1;
+					};
 				};
 			};
 			buildConfigurationList = 61A58E0E2EE21FE2008D508D /* Build configuration list for PBXProject "Zipka" */;
@@ -195,12 +287,16 @@
 			);
 			mainGroup = 61A58E0A2EE21FE2008D508D;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				61317AD32EE2390200F99A6B /* XCRemoteSwiftPackageReference "swift-protobuf" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 61A58E142EE21FE2008D508D /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
 				61A58E122EE21FE2008D508D /* Zipka */,
+				61DFDA452EE2D86100C87AC5 /* ZIpkaProtobuf */,
 				61A58E212EE21FE4008D508D /* ZipkaTests */,
 				61A58E2B2EE21FE4008D508D /* ZipkaUITests */,
 			);
@@ -253,6 +349,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		61DFDA422EE2D86100C87AC5 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -265,6 +368,11 @@
 			isa = PBXTargetDependency;
 			target = 61A58E122EE21FE2008D508D /* Zipka */;
 			targetProxy = 61A58E2D2EE21FE4008D508D /* PBXContainerItemProxy */;
+		};
+		61DFDA512EE2D8A300C87AC5 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 61DFDA452EE2D86100C87AC5 /* ZIpkaProtobuf */;
+			targetProxy = 61DFDA502EE2D8A300C87AC5 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -400,6 +508,7 @@
 				DEVELOPMENT_TEAM = PY62W2588F;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.travel";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -416,6 +525,7 @@
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_ENABLE_EXPLICIT_MODULES = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -432,6 +542,7 @@
 				DEVELOPMENT_TEAM = PY62W2588F;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.travel";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -448,6 +559,7 @@
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_ENABLE_EXPLICIT_MODULES = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -538,6 +650,36 @@
 			};
 			name = Release;
 		};
+		61DFDA4B2EE2D86100C87AC5 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = PY62W2588F;
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		61DFDA4C2EE2D86100C87AC5 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = PY62W2588F;
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -577,7 +719,40 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+		61DFDA4A2EE2D86100C87AC5 /* Build configuration list for PBXNativeTarget "ZIpkaProtobuf" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				61DFDA4B2EE2D86100C87AC5 /* Debug */,
+				61DFDA4C2EE2D86100C87AC5 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		61317AD32EE2390200F99A6B /* XCRemoteSwiftPackageReference "swift-protobuf" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/apple/swift-protobuf.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.33.3;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		61317AD42EE2390200F99A6B /* SwiftProtobuf */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 61317AD32EE2390200F99A6B /* XCRemoteSwiftPackageReference "swift-protobuf" */;
+			productName = SwiftProtobuf;
+		};
+		61317AF72EE243E100F99A6B /* protoc-gen-swift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 61317AD32EE2390200F99A6B /* XCRemoteSwiftPackageReference "swift-protobuf" */;
+			productName = "protoc-gen-swift";
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 61A58E0B2EE21FE2008D508D /* Project object */;
 }
