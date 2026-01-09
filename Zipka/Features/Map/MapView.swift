@@ -38,6 +38,12 @@ struct MapView: View {
                     .padding(.trailing, 16)
             }
         .mapScope(mapScope)
+        .sheet(isPresented: .constant(true)) {
+            SearchSheetView()
+                .presentationDetents([.height(80), .medium, .large])
+                .presentationBackgroundInteraction(.enabled(upThrough: .medium))
+                .interactiveDismissDisabled()
+        }
     }
 }
 
