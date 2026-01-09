@@ -8,10 +8,18 @@
 import Foundation
 import CoreLocation
 
+enum VehicleType{
+    case bus, tram
+}
+
 struct Vehicle: Identifiable, Equatable, Hashable {
     let id: String
     var position: CLLocationCoordinate2D
-    var bearing: Int?
+    var bearing:Int?
+    var label: String
+//    var type: VehicleType
+//    var routeId
+//    var lastUpdate: Date
     
     static func == (lhs: Vehicle, rhs: Vehicle) -> Bool {
         return lhs.id == rhs.id &&

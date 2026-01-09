@@ -13,11 +13,17 @@ import ZIpkaProtobuf
 
 @Observable
 class VehicleManager {
-    var vehicles: [Vehicle] = []
-    private var timer: Timer?
-    private let dataFetcher = DataFetcher()
+    private let apiService = ApiService()
     
-    init() {
+    var vehicles: [Vehicle] = []
+    var busList: [Vehicle] = []
+    var tramList: [Vehicle] = []
+    
+    private var timer: Timer?
+    private let locationManager: LocationManager
+    
+    init(locationManager: LocationManager) {
+        self.locationManager = locationManager
         startUpdating()
     }
     
@@ -44,7 +50,7 @@ class VehicleManager {
         
         Task {
             do {
-                let feedMessage = try await dataFetcher.fetchDataAsync(request: requestURL)
+                let feedMessage = try await apiService.fetchRealtimeDataAsync(request: requestURL)
                 
                 let newVehicles = feedMessage.entity.compactMap { entity -> Vehicle? in
                     guard entity.hasVehicle else { return nil }
@@ -57,18 +63,21 @@ class VehicleManager {
                     let lon = Double(pos.longitude)
                     
                     let id = vehicleData.hasVehicle ? vehicleData.vehicle.id : entity.id
+                
+                    let label = vehicleData.hasVehicle ? vehicleData.vehicle.label : "?"
                     
                     let bearing: Int? = pos.hasBearing ? Int(pos.bearing) : nil
                     
                     return Vehicle(
                         id: id,
                         position: CLLocationCoordinate2D(latitude: lat, longitude: lon),
-                        bearing: bearing
+                        bearing: bearing,
+                        label: label
                     )
                 }
                 
                 await MainActor.run {
-                    withAnimation {
+                    withAnimation(.easeInOut){
                         self.updateVehicles(newVehicles)
                     }
                 }

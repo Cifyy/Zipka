@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		61317AD52EE2390200F99A6B /* SwiftProtobuf in Frameworks */ = {isa = PBXBuildFile; productRef = 61317AD42EE2390200F99A6B /* SwiftProtobuf */; };
 		61317AF82EE243E100F99A6B /* protoc-gen-swift in Frameworks */ = {isa = PBXBuildFile; productRef = 61317AF72EE243E100F99A6B /* protoc-gen-swift */; };
+		61D6ECE82F1169BE00DBCD49 /* SwiftProtobuf in Frameworks */ = {isa = PBXBuildFile; productRef = 61D6ECE72F1169BE00DBCD49 /* SwiftProtobuf */; };
 		61DFDA4F2EE2D8A300C87AC5 /* libZIpkaProtobuf.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 61DFDA462EE2D86100C87AC5 /* libZIpkaProtobuf.a */; };
 /* End PBXBuildFile section */
 
@@ -56,6 +57,13 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		6114321C2EE44C7D0006A923 /* Exceptions for "Zipka" folder in "Zipka" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 61A58E122EE21FE2008D508D /* Zipka */;
+		};
 		61DFDA532EE2DB9400C87AC5 /* Exceptions for "ZIpkaProtobuf" folder in "ZIpkaProtobuf" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -68,6 +76,9 @@
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		61A58E152EE21FE2008D508D /* Zipka */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				6114321C2EE44C7D0006A923 /* Exceptions for "Zipka" folder in "Zipka" target */,
+			);
 			path = Zipka;
 			sourceTree = "<group>";
 		};
@@ -120,6 +131,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				61D6ECE82F1169BE00DBCD49 /* SwiftProtobuf in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -247,6 +259,7 @@
 			);
 			name = ZIpkaProtobuf;
 			packageProductDependencies = (
+				61D6ECE72F1169BE00DBCD49 /* SwiftProtobuf */,
 			);
 			productName = ZIpkaProtobuf;
 			productReference = 61DFDA462EE2D86100C87AC5 /* libZIpkaProtobuf.a */;
@@ -508,12 +521,18 @@
 				DEVELOPMENT_TEAM = PY62W2588F;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Zipka/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.travel";
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "For user location";
+				INFOPLIST_KEY_NSLocationUsageDescription = "For user location ";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "For determining user location";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UIStatusBarStyle = "";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -542,12 +561,18 @@
 				DEVELOPMENT_TEAM = PY62W2588F;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Zipka/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.travel";
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "For user location";
+				INFOPLIST_KEY_NSLocationUsageDescription = "For user location ";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "For determining user location";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UIStatusBarStyle = "";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -751,6 +776,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 61317AD32EE2390200F99A6B /* XCRemoteSwiftPackageReference "swift-protobuf" */;
 			productName = "protoc-gen-swift";
+		};
+		61D6ECE72F1169BE00DBCD49 /* SwiftProtobuf */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 61317AD32EE2390200F99A6B /* XCRemoteSwiftPackageReference "swift-protobuf" */;
+			productName = SwiftProtobuf;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

@@ -10,10 +10,19 @@ import SwiftData
 
 @main
 struct ZipkaApp: App {
-
+    @State private var locationManager = LocationManager()
+    @State private var vehicleManager: VehicleManager
+    
+    init() {
+        let locManager = LocationManager()
+        _locationManager = State(initialValue: locManager)
+        _vehicleManager = State(initialValue: VehicleManager(locationManager: locManager))
+    }
+    
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environment(vehicleManager)
         }
     }
 }
