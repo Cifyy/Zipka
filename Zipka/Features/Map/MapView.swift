@@ -16,16 +16,19 @@ struct MapView: View {
         span: MKCoordinateSpan(latitudeDelta: 0.1, longitudeDelta: 0.1)
     )
     @State private var mapStyle: MapStyle = .standard
+    @State private var selectedVehicle: Vehicle?
+    @State private var sheetDetent: PresentationDetent = .height(80)
     
     @Namespace var mapScope
     var body: some View {
-        Map(interactionModes: .all.subtracting([.pitch, .rotate]), scope: mapScope){
+        Map(interactionModes: .all.subtracting([.pitch, .rotate]), selection: $selectedVehicle, scope: mapScope){
                 UserAnnotation()
     
                 ForEach(vehicleManager.vehicles){ vehicle in
                     Annotation("", coordinate: vehicle.position) {
                         VehicleAnnotationView(vehicle: vehicle)
                     }
+                    .tag(vehicle)
                 }
             }
             .mapControls {
@@ -39,10 +42,25 @@ struct MapView: View {
             }
         .mapScope(mapScope)
         .sheet(isPresented: .constant(true)) {
-            SearchSheetView()
-                .presentationDetents([.height(80), .medium, .large])
+            if let vehicle = selectedVehicle {
+                VehicleDetailSheetView(vehicle: vehicle) {
+                    selectedVehicle = nil
+                }
+                .presentationDetents([.medium, .fraction(0.15)], selection: $sheetDetent)
                 .presentationBackgroundInteraction(.enabled(upThrough: .medium))
-                .interactiveDismissDisabled()
+            } else {
+                SearchSheetView()
+                    .presentationDetents([.height(80), .medium, .large], selection: $sheetDetent)
+                    .presentationBackgroundInteraction(.enabled(upThrough: .medium))
+                    .interactiveDismissDisabled()
+            }
+        }
+        .onChange(of: selectedVehicle) { _, newValue in
+            if newValue != nil {
+                sheetDetent = .medium
+            } else {
+                sheetDetent = .height(80)
+            }
         }
     }
 }
