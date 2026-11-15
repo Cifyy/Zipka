@@ -1,6 +1,15 @@
 {
-  "originHash" : "9f1e4ec4211205225a9be53f971e143ca4f7b80574f1ff773ebee5bf69ffe8ab",
+  "originHash" : "5f5061a3c776bf49d8c239337733a5623d5eb79ed81d3bc5bb3743eae52fd550",
   "pins" : [
+    {
+      "identity" : "clustermap",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/vospennikov/ClusterMap",
+      "state" : {
+        "revision" : "ff7f2f28e10b277ded408e8d14ef66cd3dbb1ccc",
+        "version" : "3.0.0"
+      }
+    },
     {
       "identity" : "swift-protobuf",
       "kind" : "remoteSourceControl",

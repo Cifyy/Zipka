@@ -19,7 +19,9 @@ struct ContentView: View {
 
 #Preview {
     ContentView()
+        .environment(VehicleManager(locationManager: LocationManager()))
 }
+
 //
 //MapAnnotation(coordinate: vehicle.position) {
 //    Circle()

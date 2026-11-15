@@ -11,6 +11,8 @@
 		61317AF82EE243E100F99A6B /* protoc-gen-swift in Frameworks */ = {isa = PBXBuildFile; productRef = 61317AF72EE243E100F99A6B /* protoc-gen-swift */; };
 		61D6ECE82F1169BE00DBCD49 /* SwiftProtobuf in Frameworks */ = {isa = PBXBuildFile; productRef = 61D6ECE72F1169BE00DBCD49 /* SwiftProtobuf */; };
 		61DFDA4F2EE2D8A300C87AC5 /* libZIpkaProtobuf.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 61DFDA462EE2D86100C87AC5 /* libZIpkaProtobuf.a */; };
+		61F3EDA130A0F120004664D8 /* ClusterMapSwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = 61F3EDA030A0F120004664D8 /* ClusterMapSwiftUI */; };
+		61F3EDA330A0F124004664D8 /* ClusterMap in Frameworks */ = {isa = PBXBuildFile; productRef = 61F3EDA230A0F124004664D8 /* ClusterMap */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -107,7 +109,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				61F3EDA130A0F120004664D8 /* ClusterMapSwiftUI in Frameworks */,
 				61DFDA4F2EE2D8A300C87AC5 /* libZIpkaProtobuf.a in Frameworks */,
+				61F3EDA330A0F124004664D8 /* ClusterMap in Frameworks */,
 				61317AF82EE243E100F99A6B /* protoc-gen-swift in Frameworks */,
 				61317AD52EE2390200F99A6B /* SwiftProtobuf in Frameworks */,
 			);
@@ -191,6 +195,8 @@
 			packageProductDependencies = (
 				61317AD42EE2390200F99A6B /* SwiftProtobuf */,
 				61317AF72EE243E100F99A6B /* protoc-gen-swift */,
+				61F3EDA030A0F120004664D8 /* ClusterMapSwiftUI */,
+				61F3EDA230A0F124004664D8 /* ClusterMap */,
 			);
 			productName = Zipka;
 			productReference = 61A58E132EE21FE2008D508D /* Zipka.app */;
@@ -302,6 +308,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				61317AD32EE2390200F99A6B /* XCRemoteSwiftPackageReference "swift-protobuf" */,
+				61F3ED9F30A0F10F004664D8 /* XCRemoteSwiftPackageReference "ClusterMap" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 61A58E142EE21FE2008D508D /* Products */;
@@ -764,6 +771,14 @@
 				minimumVersion = 1.33.3;
 			};
 		};
+		61F3ED9F30A0F10F004664D8 /* XCRemoteSwiftPackageReference "ClusterMap" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/vospennikov/ClusterMap";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.0.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -781,6 +796,16 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 61317AD32EE2390200F99A6B /* XCRemoteSwiftPackageReference "swift-protobuf" */;
 			productName = SwiftProtobuf;
+		};
+		61F3EDA030A0F120004664D8 /* ClusterMapSwiftUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 61F3ED9F30A0F10F004664D8 /* XCRemoteSwiftPackageReference "ClusterMap" */;
+			productName = ClusterMapSwiftUI;
+		};
+		61F3EDA230A0F124004664D8 /* ClusterMap */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 61F3ED9F30A0F10F004664D8 /* XCRemoteSwiftPackageReference "ClusterMap" */;
+			productName = ClusterMap;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

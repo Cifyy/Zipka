@@ -12,7 +12,7 @@ struct MapControlsView: View {
     var scope: Namespace.ID
     @Binding var mapStyle: MapStyle
     
-    // capsule rerenders on menu close, maybe it will get fixed somedaymake a 
+    // capsule rerenders on menu close, maybe it will get fixed someday
     var body: some View {
         VStack(spacing: 0) {
             Menu {

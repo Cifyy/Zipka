@@ -7,30 +7,34 @@
 
 import Foundation
 import CoreLocation
+import ClusterMap
 
-enum VehicleType{
+nonisolated enum VehicleType{
     case bus, tram
 }
 
-struct Vehicle: Identifiable, Equatable, Hashable {
+nonisolated struct Vehicle: CoordinateIdentifiable, Identifiable, Equatable, Hashable {
     let id: String
-    var position: CLLocationCoordinate2D
+    var coordinate: CLLocationCoordinate2D
     var bearing:Int?
     var label: String
+    var shouldCluster: Bool = true
+    var type: VehicleType = .bus
 //    var type: VehicleType
 //    var routeId
 //    var lastUpdate: Date
     
     static func == (lhs: Vehicle, rhs: Vehicle) -> Bool {
         return lhs.id == rhs.id &&
-               lhs.position.latitude == rhs.position.latitude &&
-               lhs.position.longitude == rhs.position.longitude &&
+               lhs.coordinate.latitude == rhs.coordinate.latitude &&
+               lhs.coordinate.longitude == rhs.coordinate.longitude &&
                lhs.bearing == rhs.bearing
     }
     func hash(into hasher: inout Hasher){
         hasher.combine(id)
-        hasher.combine(position.latitude)
-        hasher.combine(position.longitude)
+        hasher.combine(coordinate.latitude)
+        hasher.combine(coordinate.longitude)
         hasher.combine(bearing)
     }
 }
+ 

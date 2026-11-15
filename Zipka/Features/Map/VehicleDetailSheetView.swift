@@ -37,5 +37,5 @@ struct VehicleDetailSheetView: View {
 }
 
 #Preview {
-    VehicleDetailSheetView(vehicle: Vehicle(id: "123", position: .init(latitude: 50.0, longitude: 19.0), bearing: 90, label: "52"), onClose: {})
+    VehicleDetailSheetView(vehicle: Vehicle(id: "123", coordinate: .init(latitude: 50.0, longitude: 19.0), bearing: 90, label: "52"), onClose: {})
 }

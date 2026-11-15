@@ -8,112 +8,206 @@
 import SwiftUI
 import CoreLocation
 
+/// Shared look of the map markers, so vehicles and clusters read as one family.
+enum MapMarkerStyle {
+    /// Petrol blue.
+    static let bus = Color(red: 0.07, green: 0.42, blue: 0.58)
+    /// Burnt orange.
+    static let tram = Color(red: 0.84, green: 0.44, blue: 0.13)
+    /// Text colour on the white cluster bubbles.
+    static let ink = Color(red: 0.11, green: 0.13, blue: 0.19)
+    static let shadow = Color.black.opacity(0.22)
+
+    static func color(for type: VehicleType) -> Color {
+        switch type {
+        case .bus: bus
+        case .tram: tram
+        }
+    }
+
+    static func labelFont(size: CGFloat) -> Font {
+        .system(size: size, weight: .bold, design: .rounded)
+    }
+}
+
 struct VehicleAnnotationView: View {
     let vehicle: Vehicle
-    let cornerRadius: CGFloat = 4
+    var isSelected: Bool = false
+
+    private let tileSize = CGSize(width: 34, height: 26)
+    private let cornerRadius: CGFloat = 9
+    /// White border of the tile; kept equal to `pointerOutline` so both outlines match.
+    private let borderWidth: CGFloat = 1.5
+    /// Width and length of the arrow tip before its corners are rounded off.
+    private let pointerSize = CGSize(width: 9.5, height: 7.5)
+    /// Stroke in the fill colour that rounds every corner of the pointer; the corner radius is half of it.
+    private let pointerRounding: CGFloat = 4
+    /// Width of the white outline around the pointer.
+    private let pointerOutline: CGFloat = 1.5
+    /// Width of the see-through band around the tile that keeps the pointer at a distance.
+    private let bandWidth: CGFloat = 1.5
+
+    private var color: Color { MapMarkerStyle.color(for: vehicle.type) }
+
+    /// How far the pointer's path stays from the tile's edge. The rounding stroke and the
+    /// white outline are drawn on top of that, which leaves exactly `bandWidth` see-through.
+    private var pointerClearance: CGFloat {
+        borderWidth + bandWidth + pointerOutline + pointerRounding / 2
+    }
+
+    /// Big enough to hold the pointer at any bearing, so the marker never changes size.
+    private var frameSize: CGSize {
+        let margin = pointerClearance + pointerSize.height + pointerRounding / 2 + pointerOutline
+        return CGSize(width: tileSize.width + margin * 2, height: tileSize.height + margin * 2)
+    }
 
     var body: some View {
         ZStack {
-            
-            RoundedRectangle(cornerRadius: cornerRadius + 2)
-                .fill(Color.black)
-                .frame(width: 40, height: 24)
-            
             if let bearing = vehicle.bearing {
-                Image(systemName: "arrowtriangle.up.fill")
-                    .font(.system(size: 24))
-                    .foregroundColor(.white)
-                    .background(
-                        Image(systemName: "arrowtriangle.up") // Use the outline version
-                            .font(.system(size: 27))
-                            .foregroundColor(.black)
-                    )
-                    .rotationEffect(.degrees(Double(bearing)))
-                    .offset(bearingToOffSet(degrees: Double(bearing)))
+                pointer(bearing: Double(bearing))
             }
 
-            RoundedRectangle(cornerRadius: cornerRadius)
-                .fill(Color(red: 0.0, green: 0.4, blue: 0.8))
-                .frame(width: 36, height: 20)
-                .overlay(
-                    RoundedRectangle(cornerRadius: cornerRadius)
-                        .stroke(Color.white, lineWidth: 2.5)
-                )
-            
-            Text(vehicle.label)
-                .font(.system(size: 14, weight: .bold))
-                .foregroundColor(.white)
-                .minimumScaleFactor(0.7)
-        }
+            RoundedRectangle(cornerRadius: cornerRadius + borderWidth, style: .continuous)
+                .fill(.white)
+                .frame(width: tileSize.width + borderWidth * 2, height: tileSize.height + borderWidth * 2)
+            RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                .fill(color)
+                .frame(width: tileSize.width, height: tileSize.height)
 
-    }
-    
-    private func bearingToOffSet(degrees: Double) -> CGSize{
-        let xFlatOff:CGFloat = 20
-        let yFlatfOff:CGFloat = -12
-        let xAngleOff:CGFloat = 16.5
-        let yAngleOff:CGFloat = -9
-        
-        switch degrees{
-        case 0...22.5:
-            return CGSize(width: 0, height: yFlatfOff)
-        case 22.5...67.5:
-            return CGSize(width: xAngleOff, height: yAngleOff)
-        case 67.5...112.5:
-            return CGSize(width: xFlatOff, height: 0)
-        case 112.5...157.5:
-            return CGSize(width: xAngleOff, height: -yAngleOff)
-        case 157.5...202.5:
-            return CGSize(width: 0, height: -yFlatfOff)
-        case 202.5...247.5:
-            return CGSize(width: -xAngleOff, height: -yAngleOff)
-        case 247.5...292.5:
-            return CGSize(width: -xFlatOff, height: 0)
-        case 292.5...337.5:
-            return CGSize(width: -xAngleOff, height: yAngleOff)
-        case 337.5...360:
-            return CGSize(width: 0, height: yFlatfOff)
-        default:
-            return CGSize(width: 0, height: 0)
+            Text(vehicle.label)
+                .font(MapMarkerStyle.labelFont(size: 13))
+                .monospacedDigit()
+                .foregroundStyle(.white)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+                .frame(width: tileSize.width - borderWidth * 2)
         }
+        .frame(width: frameSize.width, height: frameSize.height)
+        .compositingGroup()
+        .shadow(color: MapMarkerStyle.shadow, radius: isSelected ? 6 : 3, y: 1)
+        .scaleEffect(isSelected ? 1.3 : 1)
+        .animation(.spring(duration: 0.3, bounce: 0.4), value: isSelected)
+        .accessibilityElement()
+        .accessibilityLabel("\(vehicle.type == .tram ? "Tram" : "Bus") \(vehicle.label)")
     }
-//    private func exponentialPercent(value: CGFloat, maxVal: CGFloat) -> CGFloat {
-//        let normalized = value /  maxVal
-//        
-//        let numerator = pow(10, normalized) - 1
-//        let denominator: CGFloat = 9
-//        return CGFloat(numerator / denominator)
-//    }
-//    
-//    private func bearingToOffSet(degrees: CGFloat, width: CGFloat, height: CGFloat) -> CGSize {
-//        let inputRadians = (degrees-90) * .pi / 180.0
-//        let squareX = cos(inputRadians)
-//        let squareY = sin(inputRadians)
-//        
-//        let rectX = squareX * width
-//        let rectY = squareY * height
-//        
-//        let radians = atan2(rectY, rectX)
-//        
-//        let dx = cos(radians)
-//        let dy = sin(radians)
-//        
-//        let xBound = width / 2.0
-//        let yBound = height / 2.0
-//        
-//        let tx = abs(dx) > 0.0001 ? xBound / abs(dx) : CGFloat.greatestFiniteMagnitude
-//        let ty = abs(dy) > 0.0001 ? yBound / abs(dy) : CGFloat.greatestFiniteMagnitude
-//        
-//        let t = min(tx, ty)
-//        
-//        let degreesToCorner = 45 - abs(45 - degrees.truncatingRemainder(dividingBy: 90))
-//        let inOffsetPercent = 1 - (exponentialPercent(value: degreesToCorner, maxVal: 45) * 0.2)
-//        let inXOffsetPercent = inOffsetPercent * height / width
-//        
-//        return CGSize(width: t * dx * inOffsetPercent, height: t * dy * inXOffsetPercent)
-//    }
+
+    private func pointer(bearing: Double) -> some View {
+        let shape = PointerShape(
+            bearing: bearing,
+            tileSize: tileSize,
+            cornerRadius: cornerRadius,
+            tipSize: pointerSize,
+            clearance: pointerClearance
+        )
+        return shape
+            .fill(color)
+            .stroke(color, style: StrokeStyle(lineWidth: pointerRounding, lineJoin: .round))
+            .background(
+                shape.stroke(.white, style: StrokeStyle(lineWidth: pointerRounding + pointerOutline * 2, lineJoin: .round))
+            )
+            .frame(width: frameSize.width, height: frameSize.height)
+    }
+}
+
+/// The arrow next to a vehicle tile, in the coordinate space of the whole marker
+/// (the tile is centred in the rect).
+///
+/// It is an arrow tip with a straight body behind it that reaches back under the tile;
+/// the tile, grown by `clearance`, is then cut out of it. What remains is an arrow of
+/// constant width whose base follows the tile's shape: flat on the sides, curved at the corners.
+private struct PointerShape: Shape {
+    /// Direction of travel in degrees, clockwise from north.
+    var bearing: Double
+    let tileSize: CGSize
+    let cornerRadius: CGFloat
+    /// Width and length of the triangular tip.
+    let tipSize: CGSize
+    /// Distance kept between the tile's edge and this path.
+    let clearance: CGFloat
+
+    var animatableData: Double {
+        get { bearing }
+        set { bearing = newValue }
+    }
+
+    func path(in rect: CGRect) -> Path {
+        let radians = bearing * .pi / 180
+        let direction = CGVector(dx: sin(radians), dy: -cos(radians))
+        let anchor = outlineAnchor(facing: direction)
+
+        // Drawn pointing up with the tip at the origin, then rotated and moved into place.
+        let bodyLength = clearance + cornerRadius
+        let halfWidth = tipSize.width / 2
+        var arrow = Path()
+        arrow.move(to: .zero)
+        arrow.addLine(to: CGPoint(x: halfWidth, y: tipSize.height))
+        arrow.addLine(to: CGPoint(x: halfWidth, y: tipSize.height + bodyLength))
+        arrow.addLine(to: CGPoint(x: -halfWidth, y: tipSize.height + bodyLength))
+        arrow.addLine(to: CGPoint(x: -halfWidth, y: tipSize.height))
+        arrow.closeSubpath()
+
+        let tipDistance = clearance + tipSize.height
+        let transform = CGAffineTransform(
+            translationX: rect.midX + anchor.x + direction.dx * tipDistance,
+            y: rect.midY + anchor.y + direction.dy * tipDistance
+        ).rotated(by: radians)
+
+        let cutout = Path(
+            roundedRect: CGRect(
+                x: rect.midX - tileSize.width / 2 - clearance,
+                y: rect.midY - tileSize.height / 2 - clearance,
+                width: tileSize.width + clearance * 2,
+                height: tileSize.height + clearance * 2
+            ),
+            cornerRadius: cornerRadius + clearance,
+            style: .continuous
+        )
+        return arrow.applying(transform).subtracting(cutout)
+    }
+
+    /// The point on the tile's outline where the pointer attaches for a given unit direction,
+    /// relative to the tile's centre.
+    ///
+    /// Rather than shooting a ray from the centre (which meets the outline at a slant, so the
+    /// pointer sits crooked near the corners), this picks the spot where the outline itself
+    /// faces `direction`. An ellipse inside the tile, grown by the corner radius, gives that
+    /// spot a smooth path: centred on an edge for the four cardinal directions and sliding
+    /// round the corners between.
+    private func outlineAnchor(facing direction: CGVector) -> CGPoint {
+        let innerWidth = tileSize.width / 2 - cornerRadius
+        let innerHeight = tileSize.height / 2 - cornerRadius
+
+        // Point on the inner ellipse whose normal is `direction`.
+        let scaledX = innerWidth * innerWidth * direction.dx
+        let scaledY = innerHeight * innerHeight * direction.dy
+        let norm = max(sqrt(innerWidth * innerWidth * direction.dx * direction.dx + innerHeight * innerHeight * direction.dy * direction.dy), 0.0001)
+        var point = CGPoint(
+            x: scaledX / norm + cornerRadius * direction.dx,
+            y: scaledY / norm + cornerRadius * direction.dy
+        )
+
+        let overX = max(abs(point.x) - innerWidth, 0)
+        let overY = max(abs(point.y) - innerHeight, 0)
+        let inside = min(max(abs(point.x) - innerWidth, abs(point.y) - innerHeight), 0)
+        let signedDistance = sqrt(overX * overX + overY * overY) + inside - cornerRadius
+        if signedDistance < 0 {
+            point.x -= direction.dx * signedDistance
+            point.y -= direction.dy * signedDistance
+        }
+        return point
+    }
 }
 
 #Preview {
-    VehicleAnnotationView(vehicle: Vehicle(id: "10", position: CLLocationCoordinate2D(latitude: 0, longitude: 0), bearing: 45, label: "194"))
+    VStack(spacing: 24) {
+        HStack(spacing: 24) {
+            VehicleAnnotationView(vehicle: Vehicle(id: "1", coordinate: CLLocationCoordinate2D(), bearing: 0, label: "414", type: .tram))
+            VehicleAnnotationView(vehicle: Vehicle(id: "2", coordinate: CLLocationCoordinate2D(), bearing: 45, label: "194"))
+            VehicleAnnotationView(vehicle: Vehicle(id: "3", coordinate: CLLocationCoordinate2D(), bearing: 200, label: "613", type: .tram))
+            VehicleAnnotationView(vehicle: Vehicle(id: "4", coordinate: CLLocationCoordinate2D(), bearing: nil, label: "52"))
+        }
+        VehicleAnnotationView(vehicle: Vehicle(id: "5", coordinate: CLLocationCoordinate2D(), bearing: 290, label: "139"), isSelected: true)
+    }
+    .padding(40)
+    .background(Color(white: 0.93))
 }
