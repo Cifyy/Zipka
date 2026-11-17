@@ -18,8 +18,10 @@ struct ContentView: View {
 }
 
 #Preview {
+    let staticData = LocalGTFSDataSource()
     ContentView()
-        .environment(VehicleManager(locationManager: LocationManager()))
+        .environment(VehicleManager(locationManager: LocationManager(), staticData: staticData))
+        .environment(TripDetailModel(staticData: staticData))
 }
 
 //

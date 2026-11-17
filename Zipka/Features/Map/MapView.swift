@@ -11,6 +11,7 @@ import ClusterMap
 
 struct MapView: View {
     @Environment(VehicleManager.self) var vehicleManager
+    @Environment(TripDetailModel.self) var tripModel
     
     @State private var clusterManager = ClusterManager<Vehicle>(configuration: .init(maxZoomLevel: 12, shouldDistributeAnnotationsOnSameCoordinate: false))
     
@@ -36,10 +37,37 @@ struct MapView: View {
         return vehicleManager.vehicles.first { $0.id == selectedVehicleID }
     }
     
+    /// Identifies the trip to track; changes when another vehicle is picked, the vehicle starts
+    /// a new trip, or a newer timetable arrives.
+    private struct TrackedTrip: Hashable {
+        let feed: TransitFeed
+        let tripID: String
+        let timetableRevision: Int
+    }
+
+    private var trackedTrip: TrackedTrip? {
+        guard let vehicle = selectedVehicle, let tripID = vehicle.tripID else { return nil }
+        return TrackedTrip(feed: vehicle.type.feed, tripID: tripID, timetableRevision: vehicleManager.staticDataRevision)
+    }
+
+    /// Sequence numbers of the selected trip's stops the vehicle has already left.
+    private var passedStopSequences: Set<Int> {
+        guard let vehicle = selectedVehicle else { return [] }
+        let timed = tripModel.timedStops(now: .now)
+        guard let next = TripTimetable.upcomingStops(timed, currentStopSequence: vehicle.currentStopSequence, now: .now).first else {
+            return Set(timed.map(\.stop.sequence))
+        }
+        return Set(timed.map(\.stop.sequence).filter { $0 < next.stop.sequence })
+    }
+
     @Namespace var mapScope
     var body: some View {
         Map(position: $cameraPosition, interactionModes: .all.subtracting([.pitch, .rotate]), selection: $selectedVehicleID, scope: mapScope){
                 UserAnnotation()
+
+                if let vehicle = selectedVehicle, let detail = tripModel.detail, detail.summary.tripID == vehicle.tripID {
+                    routeContent(detail, color: MapMarkerStyle.color(for: vehicle.type))
+                }
     
                 ForEach(visibleVehicles){ vehicle in
                     Annotation("", coordinate: vehicle.coordinate) {
@@ -83,7 +111,7 @@ struct MapView: View {
                 VehicleDetailSheetView(vehicle: vehicle) {
                     selectedVehicleID = nil
                 }
-                .presentationDetents([.medium, .fraction(0.15)], selection: $sheetDetent)
+                .presentationDetents([.fraction(0.15), .medium, .large], selection: $sheetDetent)
                 .presentationBackgroundInteraction(.enabled(upThrough: .medium))
             } else {
                 SearchSheetView()
@@ -95,6 +123,13 @@ struct MapView: View {
         .onChange(of: vehicleManager.vehicles) {
             reloadClusters()
         }
+        .task(id: trackedTrip) {
+            guard let trackedTrip else {
+                tripModel.reset()
+                return
+            }
+            await tripModel.track(feed: trackedTrip.feed, tripID: trackedTrip.tripID)
+        }
         .onChange(of: selectedVehicleID) { _, newValue in
             if newValue != nil {
                 sheetDetent = .medium
@@ -105,6 +140,23 @@ struct MapView: View {
         }
     }
     
+    /// The selected trip's path with a white casing, and a marker for each of its stops.
+    @MapContentBuilder
+    private func routeContent(_ detail: TripDetail, color: Color) -> some MapContent {
+        let passed = passedStopSequences
+        MapPolyline(coordinates: tripModel.routeCoordinates)
+            .stroke(.white, style: StrokeStyle(lineWidth: 8, lineCap: .round, lineJoin: .round))
+        MapPolyline(coordinates: tripModel.routeCoordinates)
+            .stroke(color, style: StrokeStyle(lineWidth: 5, lineCap: .round, lineJoin: .round))
+
+        ForEach(detail.stops) { stop in
+            Annotation("", coordinate: CLLocationCoordinate2D(latitude: stop.latitude, longitude: stop.longitude)) {
+                RouteStopAnnotationView(color: color, isPassed: passed.contains(stop.sequence))
+            }
+            .annotationTitles(.hidden)
+        }
+    }
+
     /// Reclusters the current vehicles for the visible region. The selected vehicle is kept
     /// out of clusters so it stays visible while its detail sheet is open. Results from a
     /// reload that was superseded by a newer one are discarded.
@@ -161,6 +213,8 @@ struct MapView: View {
 }
 
 #Preview {
+    let staticData = LocalGTFSDataSource()
     MapView()
-        .environment(VehicleManager(locationManager: LocationManager()))
+        .environment(VehicleManager(locationManager: LocationManager(), staticData: staticData))
+        .environment(TripDetailModel(staticData: staticData))
 }

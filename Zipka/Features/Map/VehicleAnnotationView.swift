@@ -74,7 +74,7 @@ struct VehicleAnnotationView: View {
                 .fill(color)
                 .frame(width: tileSize.width, height: tileSize.height)
 
-            Text(vehicle.label)
+            Text(vehicle.displayLine)
                 .font(MapMarkerStyle.labelFont(size: 13))
                 .monospacedDigit()
                 .foregroundStyle(.white)
@@ -88,7 +88,13 @@ struct VehicleAnnotationView: View {
         .scaleEffect(isSelected ? 1.3 : 1)
         .animation(.spring(duration: 0.3, bounce: 0.4), value: isSelected)
         .accessibilityElement()
-        .accessibilityLabel("\(vehicle.type == .tram ? "Tram" : "Bus") \(vehicle.label)")
+        .accessibilityLabel(accessibilityText)
+    }
+
+    private var accessibilityText: String {
+        let kind = vehicle.type == .tram ? "Tram" : "Bus"
+        guard let headsign = vehicle.headsign else { return "\(kind) \(vehicle.displayLine)" }
+        return "\(kind) \(vehicle.displayLine) to \(headsign)"
     }
 
     private func pointer(bearing: Double) -> some View {
@@ -201,12 +207,12 @@ private struct PointerShape: Shape {
 #Preview {
     VStack(spacing: 24) {
         HStack(spacing: 24) {
-            VehicleAnnotationView(vehicle: Vehicle(id: "1", coordinate: CLLocationCoordinate2D(), bearing: 0, label: "414", type: .tram))
-            VehicleAnnotationView(vehicle: Vehicle(id: "2", coordinate: CLLocationCoordinate2D(), bearing: 45, label: "194"))
-            VehicleAnnotationView(vehicle: Vehicle(id: "3", coordinate: CLLocationCoordinate2D(), bearing: 200, label: "613", type: .tram))
-            VehicleAnnotationView(vehicle: Vehicle(id: "4", coordinate: CLLocationCoordinate2D(), bearing: nil, label: "52"))
+            VehicleAnnotationView(vehicle: Vehicle(id: "1", coordinate: CLLocationCoordinate2D(), bearing: 0, label: "414", type: .tram, lineNumber: "52"))
+            VehicleAnnotationView(vehicle: Vehicle(id: "2", coordinate: CLLocationCoordinate2D(), bearing: 45, label: "194", lineNumber: "476"))
+            VehicleAnnotationView(vehicle: Vehicle(id: "3", coordinate: CLLocationCoordinate2D(), bearing: 200, label: "613", type: .tram, lineNumber: "4"))
+            VehicleAnnotationView(vehicle: Vehicle(id: "4", coordinate: CLLocationCoordinate2D(), bearing: nil, label: "52", lineNumber: "139"))
         }
-        VehicleAnnotationView(vehicle: Vehicle(id: "5", coordinate: CLLocationCoordinate2D(), bearing: 290, label: "139"), isSelected: true)
+        VehicleAnnotationView(vehicle: Vehicle(id: "5", coordinate: CLLocationCoordinate2D(), bearing: 290, label: "139", lineNumber: "52"), isSelected: true)
     }
     .padding(40)
     .background(Color(white: 0.93))
