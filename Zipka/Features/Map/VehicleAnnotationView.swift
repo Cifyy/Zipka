@@ -30,6 +30,25 @@ enum MapMarkerStyle {
     }
 }
 
+extension View {
+    /// The markers' drop shadow, baked into their bitmap.
+    ///
+    /// A plain `.shadow` ends up as a Core Animation shadow without a shadow path, which is
+    /// rendered offscreen again on every frame while the map pans or zooms, once per marker.
+    /// Flattening the marker with `drawingGroup()` draws the shadow only when the marker changes.
+    ///
+    /// - Parameter overflow: How far the content may reach past the view's frame (for example
+    ///   when it is scaled up), so the flattened bitmap does not cut it off.
+    func markerShadow(radius: CGFloat, y: CGFloat = 1, overflow: CGFloat = 0) -> some View {
+        let margin = overflow + radius * 2 + abs(y)
+        return compositingGroup()
+            .shadow(color: MapMarkerStyle.shadow, radius: radius, y: y)
+            .padding(margin)
+            .drawingGroup()
+            .padding(-margin)
+    }
+}
+
 struct VehicleAnnotationView: View {
     let vehicle: Vehicle
     var isSelected: Bool = false
@@ -46,6 +65,7 @@ struct VehicleAnnotationView: View {
     private let pointerOutline: CGFloat = 1.5
     /// Width of the see-through band around the tile that keeps the pointer at a distance.
     private let bandWidth: CGFloat = 1.5
+    private let selectedScale: CGFloat = 1.3
 
     private var color: Color { MapMarkerStyle.color(for: vehicle.type) }
 
@@ -83,9 +103,12 @@ struct VehicleAnnotationView: View {
                 .frame(width: tileSize.width - borderWidth * 2)
         }
         .frame(width: frameSize.width, height: frameSize.height)
-        .compositingGroup()
-        .shadow(color: MapMarkerStyle.shadow, radius: isSelected ? 6 : 3, y: 1)
-        .scaleEffect(isSelected ? 1.3 : 1)
+        // Scaled inside the flattened bitmap, so the selected marker stays sharp.
+        .scaleEffect(isSelected ? selectedScale : 1)
+        .markerShadow(
+            radius: isSelected ? 6 : 3,
+            overflow: max(frameSize.width, frameSize.height) * (selectedScale - 1) / 2
+        )
         .animation(.spring(duration: 0.3, bounce: 0.4), value: isSelected)
         .accessibilityElement()
         .accessibilityLabel(accessibilityText)

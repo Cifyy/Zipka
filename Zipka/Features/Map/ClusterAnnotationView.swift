@@ -36,11 +36,8 @@ struct ClusterAnnotationView: View {
             .padding(.horizontal, ringInset + ringWidth + 2)
             .frame(width: diameter, height: diameter)
             .background(ring.padding(ringInset + ringWidth / 2))
-            .background(
-                Circle()
-                    .fill(.white)
-                    .shadow(color: MapMarkerStyle.shadow, radius: 3, y: 1)
-            )
+            .background(Circle().fill(.white))
+            .markerShadow(radius: 3)
             .contentShape(Circle())
             .accessibilityElement()
             .accessibilityLabel("\(count) vehicles")

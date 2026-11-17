@@ -12,12 +12,19 @@ struct RouteStopAnnotationView: View {
     var isPassed: Bool = false
 
     var body: some View {
-        Circle()
-            .fill(.white)
-            .stroke(isPassed ? Color.gray.opacity(0.6) : color, lineWidth: 3)
-            .frame(width: 12, height: 12)
-            .shadow(color: MapMarkerStyle.shadow, radius: 1.5, y: 0.5)
-            .accessibilityHidden(true)
+        ZStack {
+            // The shadow is a plain shape: cheap to draw, and a blur this small comes out
+            // square when flattened with `markerShadow`.
+            Circle()
+                .fill(MapMarkerStyle.shadow)
+                .frame(width: 16, height: 16)
+                .offset(y: 0.5)
+            Circle()
+                .fill(.white)
+                .stroke(isPassed ? Color.gray.opacity(0.6) : color, lineWidth: 3)
+                .frame(width: 12, height: 12)
+        }
+        .accessibilityHidden(true)
     }
 }
 
