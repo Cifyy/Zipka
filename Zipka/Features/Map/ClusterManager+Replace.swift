@@ -19,4 +19,10 @@ extension ClusterManager {
         await reload(mapViewSize: mapViewSize, coordinateRegion: coordinateRegion)
         return visibleAnnotations
     }
+
+    /// Reclusters the existing annotations for a new region and returns the visible result.
+    func reloadVisible(mapViewSize: CGSize, coordinateRegion: MKCoordinateRegion) async -> [AnnotationType] {
+        await reload(mapViewSize: mapViewSize, coordinateRegion: coordinateRegion)
+        return visibleAnnotations
+    }
 }

@@ -5,11 +5,12 @@
 
 import Foundation
 
-/// One of the agency's GTFS feeds. Kraków publishes buses and trams separately,
-/// each with its own static timetable and its own realtime files.
+/// One of ZTP Kraków's GTFS feeds, each with its own static timetable and its own realtime files:
+/// MPK buses, MPK trams, and buses run by the subcontractor Mobilis.
 nonisolated enum TransitFeed: String, CaseIterable, Codable, Sendable {
     case bus = "A"
     case tram = "T"
+    case mobilis = "M"
 
     static let baseURL = URL(string: "https://gtfs.ztp.krakow.pl/")!
 
@@ -19,7 +20,7 @@ nonisolated enum TransitFeed: String, CaseIterable, Codable, Sendable {
 
     var vehicleType: VehicleType {
         switch self {
-        case .bus: .bus
+        case .bus, .mobilis: .bus
         case .tram: .tram
         }
     }

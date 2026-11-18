@@ -11,13 +11,6 @@ import ClusterMap
 
 nonisolated enum VehicleType{
     case bus, tram
-
-    var feed: TransitFeed {
-        switch self {
-        case .bus: .bus
-        case .tram: .tram
-        }
-    }
 }
 
 nonisolated struct Vehicle: CoordinateIdentifiable, Identifiable, Equatable, Hashable {
@@ -27,7 +20,8 @@ nonisolated struct Vehicle: CoordinateIdentifiable, Identifiable, Equatable, Has
     /// Fleet number painted on the vehicle (e.g. "103"), not the line it runs.
     var label: String
     var shouldCluster: Bool = true
-    var type: VehicleType = .bus
+    var feed: TransitFeed = .bus
+    var type: VehicleType { feed.vehicleType }
 
     /// Realtime trip the vehicle is running; links it to the static timetable.
     var tripID: String?
@@ -48,6 +42,7 @@ nonisolated struct Vehicle: CoordinateIdentifiable, Identifiable, Equatable, Has
 
     static func == (lhs: Vehicle, rhs: Vehicle) -> Bool {
         return lhs.id == rhs.id &&
+               lhs.feed == rhs.feed &&
                lhs.coordinate.latitude == rhs.coordinate.latitude &&
                lhs.coordinate.longitude == rhs.coordinate.longitude &&
                lhs.bearing == rhs.bearing &&

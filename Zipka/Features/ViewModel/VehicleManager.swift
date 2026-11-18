@@ -17,8 +17,7 @@ class VehicleManager {
     let staticData: any TransitStaticDataSource
 
     var vehicles: [Vehicle] = []
-    var busList: [Vehicle] = []
-    var tramList: [Vehicle] = []
+    private var vehiclesByFeed: [TransitFeed: [Vehicle]] = [:]
 
     /// Increases whenever a newer static timetable becomes available, so views can reload what they derived from it.
     private(set) var staticDataRevision = 0
@@ -71,8 +70,8 @@ class VehicleManager {
 
         Task {
             var succeeded = true
-            // Trams first: their feed is small, so their line numbers show up sooner on a first launch.
-            for feed in [TransitFeed.tram, .bus] {
+            // Smallest feeds first, so their line numbers show up sooner on a first launch.
+            for feed in [TransitFeed.tram, .mobilis, .bus] {
                 do {
                     if try await staticData.refresh(feed) {
                         tripSummaries[feed] = nil
@@ -96,7 +95,7 @@ class VehicleManager {
     private func resolveTrips(in feed: TransitFeed) async {
         let known = tripSummaries[feed] ?? [:]
         let unknown = unknownTrips[feed] ?? []
-        let list = feed == .bus ? busList : tramList
+        let list = vehiclesByFeed[feed] ?? []
         let missing = Set(list.compactMap(\.tripID)).filter { known[$0] == nil && !unknown.contains($0) }
         guard !missing.isEmpty else { return }
 
@@ -112,7 +111,7 @@ class VehicleManager {
     }
 
     private func withTripSummary(_ vehicle: Vehicle) -> Vehicle {
-        guard let tripID = vehicle.tripID, let summary = tripSummaries[vehicle.type.feed]?[tripID] else { return vehicle }
+        guard let tripID = vehicle.tripID, let summary = tripSummaries[vehicle.feed]?[tripID] else { return vehicle }
         var vehicle = vehicle
         vehicle.lineNumber = summary.lineNumber
         vehicle.headsign = summary.headsign
@@ -120,10 +119,10 @@ class VehicleManager {
     }
 
     private func applyTripSummaries() {
-        busList = busList.map(withTripSummary)
-        tramList = tramList.map(withTripSummary)
+        vehiclesByFeed = vehiclesByFeed.mapValues { $0.map(withTripSummary) }
+        let all = TransitFeed.allCases.flatMap { vehiclesByFeed[$0] ?? [] }
         withAnimation(.easeInOut) {
-            updateVehicles(busList + tramList)
+            updateVehicles(all)
         }
     }
 
@@ -131,14 +130,17 @@ class VehicleManager {
 
     private func fetchVehicles() {
         Task {
-            async let buses = fetchFeed(.bus)
-            async let trams = fetchFeed(.tram)
-            let (newBuses, newTrams) = await (buses, trams)
-
-            if let newBuses { busList = newBuses }
-            if let newTrams { tramList = newTrams }
-            await resolveTrips(in: .bus)
-            await resolveTrips(in: .tram)
+            await withTaskGroup(of: (TransitFeed, [Vehicle]?).self) { group in
+                for feed in TransitFeed.allCases {
+                    group.addTask { (feed, await self.fetchFeed(feed)) }
+                }
+                for await (feed, vehicles) in group {
+                    if let vehicles { vehiclesByFeed[feed] = vehicles }
+                }
+            }
+            for feed in TransitFeed.allCases {
+                await resolveTrips(in: feed)
+            }
             applyTripSummaries()
         }
     }
@@ -157,7 +159,7 @@ class VehicleManager {
                 let lat = Double(pos.latitude)
                 let lon = Double(pos.longitude)
 
-                let id = vehicleData.hasVehicle ? vehicleData.vehicle.id : entity.id
+                let id = feed.rawValue + ":" + (vehicleData.hasVehicle ? vehicleData.vehicle.id : entity.id)
 
                 let label = vehicleData.hasVehicle ? vehicleData.vehicle.label : "?"
 
@@ -170,7 +172,7 @@ class VehicleManager {
                     coordinate: CLLocationCoordinate2D(latitude: lat, longitude: lon),
                     bearing: bearing,
                     label: label,
-                    type: feed.vehicleType,
+                    feed: feed,
                     tripID: trip.flatMap { $0.hasTripID && !$0.tripID.isEmpty ? $0.tripID : nil },
                     routeID: trip.flatMap { $0.hasRouteID && !$0.routeID.isEmpty ? $0.routeID : nil },
                     currentStopSequence: vehicleData.hasCurrentStopSequence ? Int(vehicleData.currentStopSequence) : nil,

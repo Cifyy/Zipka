@@ -25,10 +25,8 @@ struct VehicleDetailSheetView: View {
             VStack(alignment: .leading, spacing: 0) {
                 header(nextStop: upcoming.first)
                     .padding(.horizontal, 20)
-                    .padding(.top, 20)
-                    .padding(.bottom, 14)
-
-                Divider()
+                    .padding(.top, 22)
+                    .padding(.bottom, 10)
 
                 content(upcoming: upcoming, now: context.date)
             }
@@ -39,32 +37,35 @@ struct VehicleDetailSheetView: View {
 
     private func header(nextStop: TimedStop?) -> some View {
         HStack(alignment: .center, spacing: 12) {
-            LineBadge(line: vehicle.displayLine, color: color)
+            LinePill(line: vehicle.displayLine, color: color)
 
-            VStack(alignment: .leading, spacing: 3) {
+            VStack(alignment: .leading, spacing: 1) {
                 Text(vehicle.headsign ?? trip.detail?.summary.headsign ?? "Unknown destination")
-                    .font(.title3.weight(.semibold))
-                    .lineLimit(2)
-                    .minimumScaleFactor(0.8)
+                    .font(.headline)
+                    .lineLimit(1)
 
-                HStack(spacing: 6) {
-                    Text("\(vehicle.type == .tram ? "Tram" : "Bus") #\(vehicle.label)")
-                        .foregroundStyle(.secondary)
+                HStack(spacing: 5) {
+                    Text("\(vehicle.type == .tram ? "Tram" : "Bus") \(vehicle.label)")
                     if let nextStop {
-                        Text("·").foregroundStyle(.tertiary)
-                        DelayLabel(stop: nextStop)
+                        Text("·")
+                        StatusText(stop: nextStop)
                     }
                 }
                 .font(.subheadline)
+                .foregroundStyle(.secondary)
+                .lineLimit(1)
             }
 
             Spacer(minLength: 8)
 
             Button(action: onClose) {
-                Image(systemName: "xmark.circle.fill")
-                    .font(.title2)
-                    .foregroundStyle(.gray.opacity(0.8))
+                Image(systemName: "xmark")
+                    .font(.footnote.weight(.bold))
+                    .foregroundStyle(.secondary)
+                    .frame(width: 30, height: 30)
+                    .background(.quaternary, in: Circle())
             }
+            .buttonStyle(.plain)
             .accessibilityLabel("Close")
         }
     }
@@ -76,12 +77,12 @@ struct VehicleDetailSheetView: View {
         switch trip.state {
         case .loaded:
             if upcoming.isEmpty {
-                message("Trip finished", systemImage: "flag.checkered", detail: "This vehicle has no more stops on this trip.")
+                message("Trip finished", systemImage: "flag.checkered")
             } else {
                 ScrollView {
-                    LazyVStack(spacing: 0) {
+                    VStack(spacing: 0) {
                         ForEach(Array(upcoming.enumerated()), id: \.element.id) { index, stop in
-                            NextStopRow(
+                            StopRow(
                                 stop: stop,
                                 now: now,
                                 color: color,
@@ -90,88 +91,86 @@ struct VehicleDetailSheetView: View {
                             )
                         }
                     }
-                    .padding(.vertical, 8)
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 16)
                 }
+                .scrollIndicators(.hidden)
             }
         case .preparingTimetable:
-            message("Preparing timetable", systemImage: "arrow.down.circle", detail: "Downloading the latest schedule. This only takes a moment the first time.", showsProgress: true)
+            message("Preparing timetable…", systemImage: nil)
         case .unavailable:
-            message("No timetable", systemImage: "calendar.badge.exclamationmark", detail: "This trip isn't in the current schedule.")
+            message("No timetable for this trip", systemImage: "calendar.badge.exclamationmark")
         case .idle, .loading:
             if vehicle.tripID == nil {
-                message("No trip", systemImage: "questionmark.circle", detail: "This vehicle isn't reporting a trip right now.")
+                message("Not in service", systemImage: "moon.zzz")
             } else {
-                ProgressView()
-                    .frame(maxWidth: .infinity)
-                    .padding(.top, 32)
+                message(nil, systemImage: nil)
             }
         }
     }
 
-    private func message(_ title: String, systemImage: String, detail: String, showsProgress: Bool = false) -> some View {
-        VStack(spacing: 8) {
-            if showsProgress {
-                ProgressView().padding(.bottom, 4)
-            } else {
+    /// A quiet one-line state in place of the list. With no symbol it shows a spinner.
+    private func message(_ title: String?, systemImage: String?) -> some View {
+        HStack(spacing: 8) {
+            if let systemImage {
                 Image(systemName: systemImage)
-                    .font(.title2)
-                    .foregroundStyle(.secondary)
+            } else {
+                ProgressView().controlSize(.small)
             }
-            Text(title).font(.headline)
-            Text(detail)
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
+            if let title {
+                Text(title)
+            }
         }
+        .font(.subheadline)
+        .foregroundStyle(.secondary)
         .frame(maxWidth: .infinity)
-        .padding(.horizontal, 32)
-        .padding(.top, 28)
+        .padding(.top, 24)
     }
 }
 
 // MARK: - Pieces
 
-/// The line number on a tile in the line's colour, matching the map marker.
-struct LineBadge: View {
+/// The line number on a small pill in the line's colour.
+private struct LinePill: View {
     let line: String
     let color: Color
 
     var body: some View {
         Text(line)
-            .font(MapMarkerStyle.labelFont(size: 20))
+            .font(MapMarkerStyle.labelFont(size: 17))
             .monospacedDigit()
             .foregroundStyle(.white)
             .lineLimit(1)
             .minimumScaleFactor(0.6)
-            .frame(minWidth: 52, minHeight: 40)
-            .padding(.horizontal, 4)
-            .background(color, in: RoundedRectangle(cornerRadius: 11, style: .continuous))
+            .padding(.horizontal, 8)
+            .frame(minWidth: 46, minHeight: 32)
+            .background(color, in: RoundedRectangle(cornerRadius: 9, style: .continuous))
             .accessibilityLabel("Line \(line)")
     }
 }
 
-/// "On time", "3 min late" or "1 min early", from the expected and scheduled time of the next stop.
-private struct DelayLabel: View {
+/// "On time", "3 min late" or "1 min early" for the next stop. Only a delay gets a colour.
+private struct StatusText: View {
     let stop: TimedStop
 
     var body: some View {
         if !stop.isRealtime {
-            Text("Scheduled").foregroundStyle(.secondary)
+            Text("Scheduled")
         } else {
             let minutes = Int((stop.delay / 60).rounded())
             if minutes >= 1 {
                 Text("\(minutes) min late").foregroundStyle(.orange)
             } else if minutes <= -1 {
-                Text("\(-minutes) min early").foregroundStyle(.blue)
+                Text("\(-minutes) min early")
             } else {
-                Text("On time").foregroundStyle(.green)
+                Text("On time")
             }
         }
     }
 }
 
-/// One stop in the list: a dot on the route line, the stop name, and when the vehicle leaves it.
-private struct NextStopRow: View {
+/// One stop: a point on a thin track, the stop name, and when the vehicle leaves it.
+private struct StopRow: View {
     let stop: TimedStop
     let now: Date
     let color: Color
@@ -180,72 +179,62 @@ private struct NextStopRow: View {
 
     var body: some View {
         HStack(spacing: 14) {
-            RouteTrack(color: color, isFirst: isNext, isLast: isLast, isEmphasized: isNext)
+            Track(color: color, isFirst: isNext, isLast: isLast, isNext: isNext)
 
             Text(stop.stop.name)
                 .font(isNext ? .body.weight(.semibold) : .body)
                 .lineLimit(1)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
-            DepartureTime(expected: stop.expected, now: now, isEmphasized: isNext)
+            Text(departureText)
+                .font(.callout.weight(isNext ? .semibold : .regular))
+                .monospacedDigit()
+                .foregroundStyle(isNext ? AnyShapeStyle(color) : AnyShapeStyle(.secondary))
         }
-        .padding(.horizontal, 20)
-        .frame(minHeight: 52)
-        .fixedSize(horizontal: false, vertical: true)
-        .accessibilityElement(children: .combine)
+        .frame(height: 44)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("\(stop.stop.name), \(departureText), at \(clock)")
+    }
+
+    private var clock: String { stop.expected.formatted(date: .omitted, time: .shortened) }
+
+    /// "Now", "4 min", or the clock time once it is an hour or more away.
+    private var departureText: String {
+        let seconds = stop.expected.timeIntervalSince(now)
+        if seconds < 60 { return "Now" }
+        if seconds < 60 * 60 { return "\(Int(seconds / 60)) min" }
+        return clock
     }
 }
 
-/// The vertical line that ties the stops together, with a dot for this stop.
-private struct RouteTrack: View {
+/// The vertical line that ties the stops together. The next stop gets a solid dot,
+/// the rest a small ring.
+private struct Track: View {
     let color: Color
     let isFirst: Bool
     let isLast: Bool
-    let isEmphasized: Bool
+    let isNext: Bool
 
     var body: some View {
         VStack(spacing: 0) {
-            Rectangle()
-                .fill(isFirst ? .clear : color)
-                .frame(width: 4)
-            Circle()
-                .fill(isEmphasized ? color : .white)
-                .stroke(color, lineWidth: 3)
-                .frame(width: isEmphasized ? 16 : 12, height: isEmphasized ? 16 : 12)
-            Rectangle()
-                .fill(isLast ? .clear : color)
-                .frame(width: 4)
-        }
-        .frame(width: 16)
-        .frame(maxHeight: .infinity)
-    }
-}
-
-/// Time until departure ("Now", "4 min"), with the clock time underneath.
-/// An hour or more away, only the clock time is shown.
-private struct DepartureTime: View {
-    let expected: Date
-    let now: Date
-    let isEmphasized: Bool
-
-    private var seconds: TimeInterval { expected.timeIntervalSince(now) }
-    private var clock: String { expected.formatted(date: .omitted, time: .shortened) }
-
-    var body: some View {
-        VStack(alignment: .trailing, spacing: 1) {
-            if seconds >= 60 * 60 {
-                Text(clock)
-                    .font(.body.weight(isEmphasized ? .semibold : .regular))
-            } else {
-                Text(seconds < 60 ? "Now" : "\(Int(seconds / 60)) min")
-                    .font(.body.weight(.semibold))
-                    .foregroundStyle(isEmphasized ? AnyShapeStyle(.tint) : AnyShapeStyle(.primary))
-                Text(clock)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+            segment(hidden: isFirst)
+            Group {
+                if isNext {
+                    Circle().fill(color).frame(width: 12, height: 12)
+                } else {
+                    Circle().strokeBorder(color, lineWidth: 2).frame(width: 9, height: 9)
+                }
             }
+            .padding(.vertical, 2)
+            segment(hidden: isLast)
         }
-        .monospacedDigit()
+        .frame(width: 12)
+    }
+
+    private func segment(hidden: Bool) -> some View {
+        Rectangle()
+            .fill(hidden ? Color.clear : color.opacity(0.35))
+            .frame(width: 2)
     }
 }
 

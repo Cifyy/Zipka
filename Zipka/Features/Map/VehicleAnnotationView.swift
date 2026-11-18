@@ -230,9 +230,9 @@ private struct PointerShape: Shape {
 #Preview {
     VStack(spacing: 24) {
         HStack(spacing: 24) {
-            VehicleAnnotationView(vehicle: Vehicle(id: "1", coordinate: CLLocationCoordinate2D(), bearing: 0, label: "414", type: .tram, lineNumber: "52"))
+            VehicleAnnotationView(vehicle: Vehicle(id: "1", coordinate: CLLocationCoordinate2D(), bearing: 0, label: "414", feed: .tram, lineNumber: "52"))
             VehicleAnnotationView(vehicle: Vehicle(id: "2", coordinate: CLLocationCoordinate2D(), bearing: 45, label: "194", lineNumber: "476"))
-            VehicleAnnotationView(vehicle: Vehicle(id: "3", coordinate: CLLocationCoordinate2D(), bearing: 200, label: "613", type: .tram, lineNumber: "4"))
+            VehicleAnnotationView(vehicle: Vehicle(id: "3", coordinate: CLLocationCoordinate2D(), bearing: 200, label: "613", feed: .tram, lineNumber: "4"))
             VehicleAnnotationView(vehicle: Vehicle(id: "4", coordinate: CLLocationCoordinate2D(), bearing: nil, label: "52", lineNumber: "139"))
         }
         VehicleAnnotationView(vehicle: Vehicle(id: "5", coordinate: CLLocationCoordinate2D(), bearing: 290, label: "139", lineNumber: "52"), isSelected: true)

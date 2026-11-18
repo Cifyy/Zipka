@@ -13,24 +13,19 @@ struct MapView: View {
     @Environment(VehicleManager.self) var vehicleManager
     @Environment(TripDetailModel.self) var tripModel
     
-    @State private var clusterManager = ClusterManager<Vehicle>(configuration: .init(maxZoomLevel: 12, shouldDistributeAnnotationsOnSameCoordinate: false))
-    
-    @State private var region = MKCoordinateRegion(
+    private static let initialRegion = MKCoordinateRegion(
         center: CLLocationCoordinate2D(latitude: 50.0647, longitude: 19.9450),
         span: MKCoordinateSpan(latitudeDelta: 0.1, longitudeDelta: 0.1)
     )
-    @State private var cameraPosition: MapCameraPosition = .region(MKCoordinateRegion(
-        center: CLLocationCoordinate2D(latitude: 50.0647, longitude: 19.9450),
-        span: MKCoordinateSpan(latitudeDelta: 0.1, longitudeDelta: 0.1)
-    ))
-    @State private var mapSize: CGSize = .zero
-    @State private var visibleVehicles: [Vehicle] = []
-    @State private var clusters: [ClusterManager<Vehicle>.ClusterAnnotation] = []
-    @State private var reloadGeneration = 0
+
+    @State private var clusterModel = VehicleClusterModel(region: initialRegion)
+    @State private var cameraPosition: MapCameraPosition = .region(initialRegion)
     
     @State private var mapStyle: MapStyle = .standard
     @State private var selectedVehicleID: String?
     @State private var sheetDetent: PresentationDetent = .height(80)
+
+    private static let vehicleSheetDetent = PresentationDetent.height(300)
     
     private var selectedVehicle: Vehicle? {
         guard let selectedVehicleID else { return nil }
@@ -47,7 +42,7 @@ struct MapView: View {
 
     private var trackedTrip: TrackedTrip? {
         guard let vehicle = selectedVehicle, let tripID = vehicle.tripID else { return nil }
-        return TrackedTrip(feed: vehicle.type.feed, tripID: tripID, timetableRevision: vehicleManager.staticDataRevision)
+        return TrackedTrip(feed: vehicle.feed, tripID: tripID, timetableRevision: vehicleManager.staticDataRevision)
     }
 
     /// Sequence numbers of the selected trip's stops the vehicle has already left.
@@ -69,14 +64,14 @@ struct MapView: View {
                     routeContent(detail, color: MapMarkerStyle.color(for: vehicle.type))
                 }
     
-                ForEach(visibleVehicles){ vehicle in
+                ForEach(clusterModel.vehicles){ vehicle in
                     Annotation("", coordinate: vehicle.coordinate) {
                         VehicleAnnotationView(vehicle: vehicle, isSelected: vehicle.id == selectedVehicleID)
                     }
                     .tag(vehicle.id)
                 }
             
-                ForEach(clusters){ cluster in
+                ForEach(clusterModel.clusters){ cluster in
                     Annotation("", coordinate: cluster.coordinate) {
                         ClusterAnnotationView(
                             count: cluster.memberAnnotations.count,
@@ -98,12 +93,14 @@ struct MapView: View {
                     .padding(.trailing, 16)
             }
             .onGeometryChange(for: CGSize.self, of: \.size) { newSize in
-                mapSize = newSize
-                reloadClusters()
+                clusterModel.setMapSize(newSize)
+            }
+            // Markers refresh about once a second while panning, and right away when the gesture ends.
+            .onMapCameraChange(frequency: .continuous) { context in
+                clusterModel.cameraMoved(to: context.region)
             }
             .onMapCameraChange(frequency: .onEnd) { context in
-                region = context.region
-                reloadClusters()
+                clusterModel.cameraSettled(at: context.region)
             }
         .mapScope(mapScope)
         .sheet(isPresented: .constant(true)) {
@@ -111,8 +108,8 @@ struct MapView: View {
                 VehicleDetailSheetView(vehicle: vehicle) {
                     selectedVehicleID = nil
                 }
-                .presentationDetents([.fraction(0.15), .medium, .large], selection: $sheetDetent)
-                .presentationBackgroundInteraction(.enabled(upThrough: .medium))
+                .presentationDetents([.fraction(0.15), Self.vehicleSheetDetent, .large], selection: $sheetDetent)
+                .presentationBackgroundInteraction(.enabled(upThrough: Self.vehicleSheetDetent))
             } else {
                 SearchSheetView()
                     .presentationDetents([.height(80), .medium, .large], selection: $sheetDetent)
@@ -120,7 +117,7 @@ struct MapView: View {
                     .interactiveDismissDisabled()
             }
         }
-        .onChange(of: vehicleManager.vehicles) {
+        .onChange(of: vehicleManager.vehicles, initial: true) {
             reloadClusters()
         }
         .task(id: trackedTrip) {
@@ -132,7 +129,7 @@ struct MapView: View {
         }
         .onChange(of: selectedVehicleID) { _, newValue in
             if newValue != nil {
-                sheetDetent = .medium
+                sheetDetent = Self.vehicleSheetDetent
             } else {
                 sheetDetent = .height(80)
             }
@@ -157,41 +154,14 @@ struct MapView: View {
         }
     }
 
-    /// Reclusters the current vehicles for the visible region. The selected vehicle is kept
-    /// out of clusters so it stays visible while its detail sheet is open. Results from a
-    /// reload that was superseded by a newer one are discarded.
+    /// Hands the current vehicles to the clusterer. The selected vehicle is kept out of
+    /// clusters so it stays visible while its detail sheet is open.
     private func reloadClusters() {
-        guard mapSize.width > 0, mapSize.height > 0 else { return }
-        
-        reloadGeneration += 1
-        let generation = reloadGeneration
-        let vehicles = vehicleManager.vehicles.map { vehicle in
+        clusterModel.setVehicles(vehicleManager.vehicles.map { vehicle in
             var vehicle = vehicle
             vehicle.shouldCluster = vehicle.id != selectedVehicleID
             return vehicle
-        }
-        let size = mapSize
-        let region = region
-        
-        Task {
-            let annotations = await clusterManager.replaceAndReload(with: vehicles, mapViewSize: size, coordinateRegion: region)
-            guard generation == reloadGeneration else { return }
-            
-            var newVehicles: [Vehicle] = []
-            var newClusters: [ClusterManager<Vehicle>.ClusterAnnotation] = []
-            for annotation in annotations {
-                switch annotation {
-                case .annotation(let vehicle):
-                    newVehicles.append(vehicle)
-                case .cluster(let cluster):
-                    newClusters.append(cluster)
-                }
-            }
-            withAnimation(.easeInOut) {
-                visibleVehicles = newVehicles
-                clusters = newClusters
-            }
-        }
+        })
     }
     
     private func zoom(into cluster: ClusterManager<Vehicle>.ClusterAnnotation) {
